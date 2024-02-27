@@ -56,60 +56,104 @@ result = {Sign,Exponent,Mantissa};
 end
 endmodule
 
+module AdderN(
+    input [31:0] A,
+    input [31:0] B,
+    input [31:0] C,
+    input [31:0] D,
+    input clk,
+    output reg [31:0] result
+);
+
+    reg [31:0] ab_result, cd_result, abcd_result;
+
+    // Instantiate FloatingAddition module for A+B
+    FloatingAddition add_AB (
+        .A(A),
+        .B(B),
+        .clk(clk),
+        .result(ab_result)
+    );
+
+    // Instantiate FloatingAddition module for C+D
+    FloatingAddition add_CD (
+        .A(C),
+        .B(D),
+        .clk(clk),
+        .result(cd_result)
+    );
+
+    // Instantiate FloatingAddition module for (A+B)+(C+D)
+    FloatingAddition add_ABCD (
+        .A(ab_result),
+        .B(cd_result),
+        .clk(clk),
+        .result(abcd_result)
+    );
+
+    // Output is the result of (A+B)+(C+D)
+    always @(posedge clk) begin
+        result <= abcd_result;
+    end
+
+endmodule
+
+
 
 //TestBench
 `timescale 1ns / 1ps
 
-module FloatingAddition_TB;
+module testbench;
 
     // Parameters
-    parameter XLEN = 32; // Define the width of A and B
+    parameter XLEN = 32;
     
     // Inputs
     reg [XLEN-1:0] A;
     reg [XLEN-1:0] B;
+    reg [XLEN-1:0] C;
+    reg [XLEN-1:0] D;
     reg clk;
     
     // Outputs
-    wire [XLEN-1:0] result;
-    wire overflow;
-    wire underflow;
-    wire exception;
-
-    // Instantiate the module under test
-    FloatingAddition #(XLEN) dut(
+    reg [XLEN-1:0] result;
+    
+    // Instantiate the AdderN module
+    AdderN dut (
         .A(A),
         .B(B),
+        .C(C),
+        .D(D),
         .clk(clk),
-        .overflow(overflow),
-        .underflow(underflow),
-        .exception(exception),
         .result(result)
     );
-
+    
     // Clock generation
-    always #5 clk = ~clk; // Toggle clock every 5 time units
-
+    always #5 clk = ~clk; // Toggle the clock every 5 time units
+    
     // Stimulus
     initial begin
         // Initialize inputs
-        A = 32'h3F800000; // 1.0 in IEEE 754 single-precision format
-        B = 32'h40000000; // 2.0 in IEEE 754 single-precision format
-
-        // Dump variables to VCD file
-        $dumpfile("dump.vcd");
-        $dumpvars;
-
-        // Wait for some time to observe outputs
+        A = 32'h40400000; // 3.0 in IEEE 754 single precision
+        B = 32'h40800000; // 4.0 in IEEE 754 single precision
+        C = 32'h40A00000; // 5.0 in IEEE 754 single precision
+        D = 32'h40C00000; // 6.0 in IEEE 754 single precision
+        
+        // Apply stimulus
+        
+        // Finish simulation after some time
         #100;
-
-        // Finish simulation
         $finish;
     end
-
-    // Monitor
+    
+    // Output display
     always @(posedge clk) begin
-        $display("A = %h, B = %h, Result = %h", A, B, result);
+        $display("A = %f, B = %f, C = %f, D = %f, Result = %f", 
+                 $bitstoreal(A), 
+                 $bitstoreal(B), 
+                 $bitstoreal(C), 
+                 $bitstoreal(D), 
+                 $bitstoreal(result));
     end
-
+    
 endmodule
