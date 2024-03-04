@@ -102,9 +102,7 @@ module FloatingReciprocal#(parameter XLEN=32)
                         (
                          input [XLEN-1:0]B,
                          input clk,
-                         output overflow,
-                         output underflow,
-                         output exception,
+                         
                           output [XLEN-1:0] reciprocal);
                          
 reg [23:0] A_Mantissa,B_Mantissa;

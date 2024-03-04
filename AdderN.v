@@ -65,7 +65,7 @@ module AdderN(
     output reg [31:0] result
 );
 
-    reg [31:0] ab_result, cd_result, abcd_result;
+    wire [31:0] ab_result, cd_result, abcd_result;
 
     // Instantiate FloatingAddition module for A+B
     FloatingAddition add_AB (
@@ -92,7 +92,7 @@ module AdderN(
     );
 
     // Output is the result of (A+B)+(C+D)
-    always @(posedge clk) begin
+  always @(*) begin
         result <= abcd_result;
     end
 
@@ -103,23 +103,20 @@ endmodule
 //TestBench
 `timescale 1ns / 1ps
 
-module testbench;
+module tb_AdderN;
 
     // Parameters
     parameter XLEN = 32;
-    
+
     // Inputs
-    reg [XLEN-1:0] A;
-    reg [XLEN-1:0] B;
-    reg [XLEN-1:0] C;
-    reg [XLEN-1:0] D;
+    reg [XLEN-1:0] A, B, C, D;
     reg clk;
-    
+
     // Outputs
-    reg [XLEN-1:0] result;
-    
+    wire [XLEN-1:0] result;
+
     // Instantiate the AdderN module
-    AdderN dut (
+    AdderN uut (
         .A(A),
         .B(B),
         .C(C),
@@ -127,33 +124,32 @@ module testbench;
         .clk(clk),
         .result(result)
     );
-    
+
     // Clock generation
-    always #5 clk = ~clk; // Toggle the clock every 5 time units
-    
-    // Stimulus
+    always #5 clk = ~clk;
+
+    // Test stimulus
     initial begin
         // Initialize inputs
-        A = 32'h40400000; // 3.0 in IEEE 754 single precision
-        B = 32'h40800000; // 4.0 in IEEE 754 single precision
-        C = 32'h40A00000; // 5.0 in IEEE 754 single precision
-        D = 32'h40C00000; // 6.0 in IEEE 754 single precision
+        A = 32'h40e9999a;  // Value of 1.0 in IEEE 754 single-precision format
+        B = 32'h40d9999a;  // Value of 2.0 in IEEE 754 single-precision format
+        C = 32'h40666666;  // Value of 3.0 in IEEE 754 single-precision format
+        D = 32'h40266666;  // Value of 4.0 in IEEE 754 single-precision format
+
+        // Wait for a few clock cycles for stability
+        #10;
+
+        // Display header
+        $display("Time\tA\tB\tC\tD\tResult");
+
+        // Apply inputs and display results
         
-        // Apply stimulus
-        
-        // Finish simulation after some time
-        #100;
+
+        // End simulation
+        $dumpfile("waveforms.vcd");
+        $dumpvars(0, tb_AdderN);
+        $display("Waveforms dumped to waveforms.vcd");
         $finish;
     end
-    
-    // Output display
-    always @(posedge clk) begin
-        $display("A = %f, B = %f, C = %f, D = %f, Result = %f", 
-                 $bitstoreal(A), 
-                 $bitstoreal(B), 
-                 $bitstoreal(C), 
-                 $bitstoreal(D), 
-                 $bitstoreal(result));
-    end
-    
+
 endmodule
