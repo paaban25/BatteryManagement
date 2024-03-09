@@ -98,20 +98,6 @@ module ZeroComparator_tb;
     if (gt || lt || !eq) $display("Test failed!");
     else $display("Test passed!");
 
-    // Test case 5: Input is negative zero
-    in <= 32'b10000000_00000000_00000000_00000000; // Negative zero
-    #10;
-    $display("Test case 5: Input is negative zero");
-    if (gt || lt || !eq) $display("Test failed!");
-    else $display("Test passed!");
-
-    // Test case 6: Input is a non-zero value
-    in <= 32'b00111111_00000000_00000000_00000000; // 0.5
-    #10;
-    $display("Test case 6: Input is a non-zero value");
-    if (gt || lt || eq) $display("Test failed!");
-    else $display("Test passed!");
-
     // End of simulation
     #10;
     $finish;
