@@ -143,7 +143,7 @@ FloatingMultiplication M7(.A(x2),.B(temp7),.clk(clk),.result(x3));
 
 /*----Reciprocal : 1/B----*/
 assign Exponent = x3[30:23]+8'd126-B[30:23];
-assign reciprocal = {B[31],Exponent,x3[22:0]};
+  assign reciprocal = (B==32'b0)?32'b0:{B[31],Exponent,x3[22:0]};
 
 
 endmodule
@@ -173,9 +173,7 @@ module FloatingReciprocal_TB;
         
         .B(B),
         .clk(clk),
-        .overflow(overflow),
-        .underflow(underflow),
-        .exception(exception),
+        
         .reciprocal(reciprocal)
     );
 
@@ -186,7 +184,7 @@ module FloatingReciprocal_TB;
     initial begin
         // Initialize inputs
         
-        B = 32'h40000000; // 2.0 in IEEE 754 single-precision format
+        B = 32'h00000000; // 2.0 in IEEE 754 single-precision format
 
         // Dump variables to VCD file
         $dumpfile("dump.vcd");

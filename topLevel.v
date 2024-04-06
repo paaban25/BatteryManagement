@@ -176,7 +176,7 @@ reg [7:0] A_adjust,B_adjust;
 reg A_sign,B_sign,Sign;
 reg [32:0] Temp;
 wire [31:0] temp1,temp2,temp3,temp4,temp5,temp6,temp7,debug;
-//wire [31:0] reciprocal;
+wire [31:0] reciprocal;
 wire [31:0] x0,x1,x2,x3;
 reg [6:0] exp_adjust;
 reg [XLEN-1:0] B_scaled; 
@@ -204,10 +204,11 @@ FloatingMultiplication M7(.A(x2),.B(temp7),.clk(clk),.result(x3));
 
 /*----Reciprocal : 1/B----*/
 assign Exponent = x3[30:23]+8'd126-B[30:23];
-assign reciprocal = {B[31],Exponent,x3[22:0]};
+  assign reciprocal = (B==32'b0)?32'b0:{B[31],Exponent,x3[22:0]};
 
 
 endmodule
+
 
 
 
