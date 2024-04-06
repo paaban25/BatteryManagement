@@ -1,6 +1,5 @@
 `timescale 1ns/1ns // Specify timescale
 
-
 module control_path(input gt,lt,eq,
                    output reg sel,eqt);
   always@*
@@ -81,6 +80,7 @@ reg carry;
 reg [2:0] one_hot;
 reg comp;
 reg [7:0] exp_adjust;
+integer i;
 always @(*)
 begin
 
@@ -105,11 +105,15 @@ if(carry)
     end
 else
     begin
-    while(!Temp_Mantissa[23])
-        begin
-           Temp_Mantissa = Temp_Mantissa<<1;
-           exp_adjust =  exp_adjust-1'b1;
-        end
+for (i = 0; i < 256; i = i + 1) begin
+    if (!Temp_Mantissa[23]) begin
+        Temp_Mantissa = Temp_Mantissa << 1;
+        exp_adjust = exp_adjust - 1'b1;
+    end else begin
+        // Terminate the loop by setting i to MAX_ITERATIONS
+        i = 256;
+    end
+end
     end
 Sign = A_sign;
 Mantissa = Temp_Mantissa[22:0];
@@ -172,7 +176,7 @@ reg [7:0] A_adjust,B_adjust;
 reg A_sign,B_sign,Sign;
 reg [32:0] Temp;
 wire [31:0] temp1,temp2,temp3,temp4,temp5,temp6,temp7,debug;
-wire [31:0] reciprocal;
+//wire [31:0] reciprocal;
 wire [31:0] x0,x1,x2,x3;
 reg [6:0] exp_adjust;
 reg [XLEN-1:0] B_scaled; 
@@ -350,8 +354,8 @@ module DEN_GEN(
     wire [31:0] addent [0:3];
   
     genvar i;
-    generate 
-        for (i = 0; i < 4; i = i + 1) begin
+    generate
+        for (i = 0; i < 4; i = i + 1) begin : gen
             FloatingReciprocal F(.B(SOC[i]), .clk(clk), .reciprocal(inverse[i]));
             MUX M(.data0(SOC[i]), .data1(inverse[i]), .select(mode), .mux_output(addent[i]));
         end
