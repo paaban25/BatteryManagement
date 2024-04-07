@@ -1,3 +1,4 @@
+// Code your design here
 `timescale 1ns/1ns // Specify timescale
 
 module control_path(input gt,lt,eq,
@@ -428,10 +429,11 @@ assign SOC[3] = soc4;
     end
   endgenerate
                        
-                       assign I1=iOut[0];
-                       assign I2=iOut[1];
-                       assign I3=iOut[2];
-                       assign I4=iOut[3];
+  assign I1 = ((soc1 || soc2 || soc3 || soc4) == 32'b0) ? 32'b0 : iOut[0];
+assign I2 = ((soc1 || soc2 || soc3 || soc4) == 32'b0) ? 32'b0 : iOut[1];
+assign I3 = ((soc1 || soc2 || soc3 || soc4) == 32'b0) ? 32'b0 : iOut[2];
+assign I4 = ((soc1 || soc2 || soc3 || soc4) == 32'b0) ? 32'b0 : iOut[3];
+
 endmodule
 
 
